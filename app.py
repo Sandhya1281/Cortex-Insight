@@ -191,11 +191,6 @@ def estimate_slice_volume_cm3(gray_image: Image.Image) -> tuple[float, float]:
 
 
 def detect_anomaly_side(gray_image: Image.Image) -> str | None:
-    """Heuristic only, not a real lesion-detection model: finds the point of
-    strongest local contrast inside the brain mask (tumors usually stand out
-    from surrounding tissue) and reports which side of the slice it falls on.
-    Used purely to stop the 3D view from always placing e.g. every glioma on
-    the left regardless of what the actual uploaded image shows."""
     size = 160
     small = gray_image.resize((size, size))
     arr = np.asarray(small).astype(float)
@@ -205,7 +200,7 @@ def detect_anomaly_side(gray_image: Image.Image) -> str | None:
         return None
     blurred = np.asarray(small.filter(ImageFilter.GaussianBlur(radius=6))).astype(float)
     anomaly = np.abs(arr - blurred)
-    anomaly[approx. mask] = 0
+    anomaly[~mask] = 0
     row, col = np.unravel_index(np.argmax(anomaly), anomaly.shape)
     centroid_col = np.nonzero(mask)[1].mean()
     return "left" if col < centroid_col else "right"
