@@ -1,0 +1,151 @@
+{
+  "split": "test",
+  "samples": 860,
+  "threshold_floor": 0.18,
+  "mean_dice": 0.1409530864901865,
+  "median_dice": 0.09972737327638304,
+  "mean_iou": 0.08335076744375333,
+  "median_iou": 0.05248056288100936,
+  "examples": [
+    {
+      "filename": "brisc2025_test_00001_gl_ax_t1.jpg",
+      "dice": 0.04597423023410562,
+      "iou": 0.023527954925391618,
+      "predicted_area": 48442,
+      "target_area": 1151
+    },
+    {
+      "filename": "brisc2025_test_00002_gl_ax_t1.jpg",
+      "dice": 0.07600052717128673,
+      "iou": 0.03950132432185588,
+      "predicted_area": 43345,
+      "target_area": 2181
+    },
+    {
+      "filename": "brisc2025_test_00003_gl_ax_t1.jpg",
+      "dice": 0.1338510033059122,
+      "iou": 0.07172578585259341,
+      "predicted_area": 46239,
+      "target_area": 5789
+    },
+    {
+      "filename": "brisc2025_test_00004_gl_ax_t1.jpg",
+      "dice": 0.13767576509511995,
+      "iou": 0.07392685039195221,
+      "predicted_area": 44371,
+      "target_area": 3989
+    },
+    {
+      "filename": "brisc2025_test_00005_gl_ax_t1.jpg",
+      "dice": 0.03595553808213303,
+      "iou": 0.018306886009608385,
+      "predicted_area": 54766,
+      "target_area": 1192
+    },
+    {
+      "filename": "brisc2025_test_00006_gl_ax_t1.jpg",
+      "dice": 0.030682043235173137,
+      "iou": 0.015580035275551567,
+      "predicted_area": 60599,
+      "target_area": 5042
+    },
+    {
+      "filename": "brisc2025_test_00007_gl_ax_t1.jpg",
+      "dice": 0.03335790637670476,
+      "iou": 0.016961859244681847,
+      "predicted_area": 42615,
+      "target_area": 793
+    },
+    {
+      "filename": "brisc2025_test_00008_gl_ax_t1.jpg",
+      "dice": 0.06684075499358622,
+      "iou": 0.03457591771926914,
+      "predicted_area": 41716,
+      "target_area": 1940
+    },
+    {
+      "filename": "brisc2025_test_00009_gl_ax_t1.jpg",
+      "dice": 0.06414448077222482,
+      "iou": 0.03313495254946115,
+      "predicted_area": 61294,
+      "target_area": 9359
+    },
+    {
+      "filename": "brisc2025_test_00010_gl_ax_t1.jpg",
+      "dice": 0.02805368815278327,
+      "iou": 0.014226395507950738,
+      "predicted_area": 42154,
+      "target_area": 835
+    },
+    {
+      "filename": "brisc2025_test_00011_gl_ax_t1.jpg",
+      "dice": 0.014054600606673408,
+      "iou": 0.0070770327376406495,
+      "predicted_area": 39246,
+      "target_area": 314
+    },
+    {
+      "filename": "brisc2025_test_00012_gl_ax_t1.jpg",
+      "dice": 0.059495665878644605,
+      "iou": 0.03065989847715736,
+      "predicted_area": 53997,
+      "target_area": 1839
+    },
+    {
+      "filename": "brisc2025_test_00013_gl_ax_t1.jpg",
+      "dice": 0.10738105470926253,
+      "iou": 0.056736753574432294,
+      "predicted_area": 58699,
+      "target_area": 4124
+    },
+    {
+      "filename": "brisc2025_test_00014_gl_ax_t1.jpg",
+      "dice": 0.008875739644970414,
+      "iou": 0.004457652303120356,
+      "predicted_area": 41023,
+      "target_area": 9677
+    },
+    {
+      "filename": "brisc2025_test_00015_gl_ax_t1.jpg",
+      "dice": 0.04384666428462049,
+      "iou": 0.022414737885864885,
+      "predicted_area": 35920,
+      "target_area": 3262
+    },
+    {
+      "filename": "brisc2025_test_00016_gl_ax_t1.jpg",
+      "dice": 0.016725720196307137,
+      "iou": 0.008433387336603121,
+      "predicted_area": 42493,
+      "target_area": 2946
+    },
+    {
+      "filename": "brisc2025_test_00017_gl_ax_t1.jpg",
+      "dice": 0.04942673094842604,
+      "iou": 0.025339592074107922,
+      "predicted_area": 47942,
+      "target_area": 1424
+    },
+    {
+      "filename": "brisc2025_test_00018_gl_ax_t1.jpg",
+      "dice": 0.21624902453828146,
+      "iou": 0.12123274353490181,
+      "predicted_area": 26513,
+      "target_area": 8086
+    },
+    {
+      "filename": "brisc2025_test_00019_gl_ax_t1.jpg",
+      "dice": 0.2897959183673469,
+      "iou": 0.16945107398568018,
+      "predicted_area": 48479,
+      "target_area": 10811
+    },
+    {
+      "filename": "brisc2025_test_00020_gl_ax_t1.jpg",
+      "dice": 0.14556962025316456,
+      "iou": 0.07849829351535836,
+      "predicted_area": 57668,
+      "target_area": 4900
+    }
+  ]
+}

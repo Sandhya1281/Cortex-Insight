@@ -1,0 +1,7 @@
+pandas
+numpy
+Pillow
+scikit-learn>=1.7,<1.9
+joblib
+streamlit
+plotly
