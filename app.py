@@ -116,6 +116,32 @@ NO_TUMOR_LABEL = "no_tumor"
 NO_TUMOR_CONFIDENCE_PENALTY = 0.18
 
 
+def estimator_probabilities(estimator, features: np.ndarray, classes: list[str]) -> np.ndarray | None:
+    """Return estimator probabilities aligned to the outer model's class order."""
+    if not hasattr(estimator, "predict_proba"):
+        return None
+
+    raw_probs = estimator.predict_proba(features)[0]
+    estimator_classes = list(getattr(estimator, "classes_", range(len(raw_probs))))
+    aligned = np.zeros(len(classes), dtype=float)
+
+    for index, estimator_class in enumerate(estimator_classes):
+        if index >= len(raw_probs):
+            continue
+
+        # VotingClassifier encodes string labels as integers for sub-estimators.
+        if isinstance(estimator_class, (int, np.integer)) and 0 <= int(estimator_class) < len(classes):
+            class_index = int(estimator_class)
+        elif estimator_class in classes:
+            class_index = classes.index(estimator_class)
+        else:
+            continue
+
+        aligned[class_index] = raw_probs[index]
+
+    return aligned if aligned.sum() > 0 else None
+
+
 def predict_with_confidence(uploaded_file, image_size: int = 48) -> dict:
     with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp:
         temp.write(uploaded_file.getbuffer())
@@ -124,22 +150,21 @@ def predict_with_confidence(uploaded_file, image_size: int = 48) -> dict:
     features = image_features(temp_path, size=image_size).reshape(1, -1)
     model = load_model()
 
-    try:
-        prob_estimators = [
-            model.named_estimators_[name]
-            for name in ("knn_cosine", "extra_trees", "pca_hgb")
-            if name in model.named_estimators_
-        ]
-        if not prob_estimators:
-            raise AttributeError("no probability-capable sub-estimators found")
+    classes = list(getattr(model, "classes_", LABELS.keys()))
+    predicted = model.predict(features)[0]
+    probability_rows = []
 
-        avg_probs = np.mean([est.predict_proba(features)[0] for est in prob_estimators], axis=0)
-        # NB: each sub-estimator's own .classes_ is just [0, 1, 2, 3] --
-        # VotingClassifier integer-encodes y internally before fitting them.
-        # The real string labels (alphabetically sorted, matching that
-        # encoding) live on the outer model instead.
-        classes = list(model.classes_)
+    if hasattr(model, "named_estimators_"):
+        for name in ("knn_cosine", "extra_trees", "pca_hgb"):
+            estimator = model.named_estimators_.get(name)
+            if estimator is None:
+                continue
+            probs = estimator_probabilities(estimator, features, classes)
+            if probs is not None:
+                probability_rows.append(probs)
 
+    if probability_rows:
+        avg_probs = np.mean(probability_rows, axis=0)
         adjusted = avg_probs.copy()
         if NO_TUMOR_LABEL in classes:
             adjusted[classes.index(NO_TUMOR_LABEL)] -= NO_TUMOR_CONFIDENCE_PENALTY
@@ -147,22 +172,17 @@ def predict_with_confidence(uploaded_file, image_size: int = 48) -> dict:
         adjusted = np.clip(adjusted, 0, None)
         if adjusted.sum() <= 0:
             adjusted = avg_probs
+
         display_probs = adjusted / adjusted.sum()
-        predicted = classes[int(np.argmax(display_probs))]
         return {
             "prediction": predicted,
-            "confidence": float(display_probs[classes.index(predicted)]),
+            "confidence": float(display_probs[classes.index(predicted)]) if predicted in classes else 0.0,
             "probabilities": {label: float(prob) for label, prob in zip(classes, display_probs)},
         }
-    except Exception:
-        # Fall back to the plain hard vote if anything about the
-        # probability path doesn't line up (e.g. a different sklearn
-        # version renames/restructures the fitted sub-estimators).
-        predicted = model.predict(features)[0]
-        classes = list(getattr(model, "classes_", LABELS.keys()))
-        probabilities = {label: 0.0 for label in classes}
-        probabilities[predicted] = 1.0
-        return {"prediction": predicted, "confidence": 1.0, "probabilities": probabilities}
+
+    probabilities = {label: 0.0 for label in classes}
+    probabilities[predicted] = 1.0
+    return {"prediction": predicted, "confidence": 1.0, "probabilities": probabilities}
 
 
 def predict(uploaded_file, image_size: int = 48) -> str:
@@ -221,7 +241,7 @@ def estimate_tumor_measurements(gray_image: Image.Image) -> dict | None:
         return None
     blurred = np.asarray(small.filter(ImageFilter.GaussianBlur(radius=6))).astype(float)
     anomaly = np.abs(arr - blurred)
-    anomaly[approx. mask] = 0
+    anomaly[~mask] = 0
     if anomaly.max() <= 0:
         return None
 
@@ -255,7 +275,7 @@ def make_gradcam_views(gray_image: Image.Image, prediction: str) -> dict:
     mask = arr > threshold
     blurred = np.asarray(small.filter(ImageFilter.GaussianBlur(radius=7))).astype(float)
     heat = np.abs(arr - blurred)
-    heat[approx. mask] = 0
+    heat[~mask] = 0
     if prediction == "no_tumor" or heat.max() <= 0:
         heat = np.zeros_like(heat)
     else:
