@@ -300,8 +300,15 @@ def confidence_bar_html(probabilities: dict, prediction: str) -> str:
         rows.append(f'<div class="confidence-row{active}"><span>{LABELS.get(label, label)}</span><b>{blocks}</b><em>{pct:.1f}%</em></div>')
     return '<div class="confidence-list">' + "".join(rows) + "</div>"
 
+def app_secret(name: str, default: str | None = None) -> str | None:
+    try:
+        return st.secrets.get(name, os.getenv(name, default))
+    except Exception:
+        return os.getenv(name, default)
+
+
 def groq_summary(trial: dict) -> str:
-    api_key = os.getenv("GROQ_API_KEY")
+    api_key = app_secret("GROQ_API_KEY")
     if not api_key:
         return (
             "Groq explanation is ready to use once GROQ_API_KEY is set. "
@@ -320,7 +327,7 @@ def groq_summary(trial: dict) -> str:
     )
     payload = json.dumps(
         {
-            "model": os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
+            "model": app_secret("GROQ_MODEL", "llama-3.3-70b-versatile"),
             "messages": [
                 {"role": "system", "content": "You explain medical AI outputs cautiously and clearly."},
                 {"role": "user", "content": prompt},
