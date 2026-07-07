@@ -79,7 +79,7 @@ def spline_brain_html(prediction: str, name: str, compact: bool = False) -> str:
     )
     return f"""
     <div class="spline-frame {size_class}">
-        <iframe src="{SPLINE_URL}" title="3D brain â€” {name}"
+        <iframe src="{SPLINE_URL}" title="3D brain - {name}"
                 loading="lazy" allow="autoplay; fullscreen"></iframe>
         {flag_html}
     </div>
@@ -171,7 +171,7 @@ def predict(uploaded_file, image_size: int = 48) -> str:
 
 # Illustrative field-of-view assumption for a typical axial T1 head slice.
 # There's no DICOM spacing on a plain JPG/PNG upload, so this converts pixel
-# coverage into a plausible cm^3 figure -- labelled "estimated" in the UI,
+# coverage into a plausible mm^3 figure -- labelled "estimated" in the UI,
 # not a clinical measurement.
 ASSUMED_FOV_MM = 220.0
 ASSUMED_SLICE_THICKNESS_MM = 5.0
@@ -205,7 +205,7 @@ def detect_anomaly_side(gray_image: Image.Image) -> str | None:
         return None
     blurred = np.asarray(small.filter(ImageFilter.GaussianBlur(radius=6))).astype(float)
     anomaly = np.abs(arr - blurred)
-    anomaly[~mask] = 0
+    anomaly[approx. mask] = 0
     row, col = np.unravel_index(np.argmax(anomaly), anomaly.shape)
     centroid_col = np.nonzero(mask)[1].mean()
     return "left" if col < centroid_col else "right"
@@ -215,7 +215,7 @@ def estimate_tumor_measurements(gray_image: Image.Image) -> dict | None:
     """Approximate size for the flagged region, reusing the same contrast-hotspot
     heuristic as detect_anomaly_side. Reports a greatest-diameter figure (the
     shorthand radiology reports commonly use for a roughly round mass, e.g.
-    "2.3 cm") and a spherical volume derived from it. This is a single-slice
+    "23 mm") and a spherical volume derived from it. This is a single-slice
     heuristic, not a segmentation model -- treat it as illustrative only."""
     size = 160
     small = gray_image.resize((size, size))
@@ -226,7 +226,7 @@ def estimate_tumor_measurements(gray_image: Image.Image) -> dict | None:
         return None
     blurred = np.asarray(small.filter(ImageFilter.GaussianBlur(radius=6))).astype(float)
     anomaly = np.abs(arr - blurred)
-    anomaly[~mask] = 0
+    anomaly[approx. mask] = 0
     if anomaly.max() <= 0:
         return None
 
@@ -260,7 +260,7 @@ def make_gradcam_views(gray_image: Image.Image, prediction: str) -> dict:
     mask = arr > threshold
     blurred = np.asarray(small.filter(ImageFilter.GaussianBlur(radius=7))).astype(float)
     heat = np.abs(arr - blurred)
-    heat[~mask] = 0
+    heat[approx. mask] = 0
     if prediction == "no_tumor" or heat.max() <= 0:
         heat = np.zeros_like(heat)
     else:
@@ -321,8 +321,8 @@ def groq_summary(trial: dict) -> str:
         "Do not claim a diagnosis. Mention that this is decision support only. "
         f"Prediction: {LABELS.get(trial['prediction'], trial['prediction'])}. "
         f"Confidence scores: {probs}. "
-        f"Approximate tumor diameter cm: {trial.get('tumor_diameter_mm', 0) / 10 if trial.get('tumor_diameter_mm') else 'not estimated'}. "
-        f"Approximate tumor volume cm3: {trial.get('tumor_volume_cm3', 'not estimated')}. "
+        f"Approximate tumor diameter mm: {trial.get('tumor_diameter_mm', 'not estimated')}. "
+        f"Approximate tumor volume mm3: {trial.get('tumor_volume_cm3', 0) * 1000 if trial.get('tumor_volume_cm3') else 'not estimated'}. "
         f"Flagged side/region: {trial.get('side') or 'not localized'}."
     )
     payload = json.dumps(
@@ -396,7 +396,7 @@ def brain_scene_html(prediction: str, name: str, trial_label: str, compact: bool
         <div class="brain-label">
             <span>{trial_label}</span>
             <strong>{label}</strong>
-            <em>{style['region']} Â· {name}</em>
+            <em>{style['region']} - {name}</em>
         </div>
     </div>
     """
@@ -1019,7 +1019,7 @@ if "trials" not in st.session_state:
 st.markdown(
     """
     <div class="hero">
-      <div class="hero-eyebrow">BRISC-2025 Â· T1 classifier online</div>
+      <div class="hero-eyebrow">BRISC-2025 - T1 classifier online</div>
       <div class="hero-title">Cortex Insight</div>
       <div class="hero-sub">Drop a T1 MRI slice, run the classifier, and get a coordinate-tagged 3D readout for every trial.</div>
     </div>
@@ -1031,7 +1031,7 @@ top_left, top_right = st.columns([0.94, 1.06], gap="large")
 
 with top_left:
     st.markdown('<div class="panel">', unsafe_allow_html=True)
-    st.markdown('<div class="panel-head"><b>01</b> Â· Scan intake</div>', unsafe_allow_html=True)
+    st.markdown('<div class="panel-head"><b>01</b> - Scan intake</div>', unsafe_allow_html=True)
     uploaded = st.file_uploader("MRI slice", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
     analyze = st.button("Run analysis", disabled=uploaded is None)
     if uploaded:
@@ -1045,7 +1045,7 @@ with top_left:
                 <img src="data:image/png;base64,{encoded}" alt="Uploaded MRI slice" />
                 <div class="mri-crosshair"></div>
             </div>
-            <div class="mri-caption"><span>{uploaded.name}</span><b>T1 Â· GRAYSCALE</b></div>
+            <div class="mri-caption"><span>{uploaded.name}</span><b>T1 - GRAYSCALE</b></div>
             """,
             unsafe_allow_html=True,
         )
@@ -1082,17 +1082,17 @@ with top_left:
     st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown('<div class="panel" style="margin-top:16px;">', unsafe_allow_html=True)
-    st.markdown('<div class="panel-head"><b>02</b> Â· Scan measurements</div>', unsafe_allow_html=True)
+    st.markdown('<div class="panel-head"><b>02</b> - Scan measurements</div>', unsafe_allow_html=True)
     if st.session_state.trials:
         latest = st.session_state.trials[0]
         v1, v2 = st.columns(2)
-        v1.metric("Est. slice volume", f"{latest.get('volume_cm3', 0):.1f} cmÂ³")
+        v1.metric("Est. slice volume", f"{latest.get('volume_cm3', 0) * 1000:.0f} mm^3")
         v2.metric("Tissue coverage", f"{latest.get('tissue_fraction', 0) * 100:.1f}%")
         if latest.get("tumor_diameter_mm"):
             t1, t2 = st.columns(2)
-            t1.metric("Tumor diameter (approx.)", f"{latest['tumor_diameter_mm'] / 10:.1f} cm")
-            t2.metric("Tumor volume (approx.)", f"{latest['tumor_volume_cm3']:.2f} cmÂ³")
-        st.caption("Approximate, derived from this single slice â€” not a clinical measurement.")
+            t1.metric("Tumor diameter (approx.)", f"{latest['tumor_diameter_mm']:.0f} mm")
+            t2.metric("Tumor volume (approx.)", f"{latest['tumor_volume_cm3'] * 1000:.0f} mm^3")
+        st.caption("Approximate, derived from this single slice - not a clinical measurement.")
     else:
         st.write("Volume estimates appear here once a scan has been analyzed.")
     st.markdown("</div>", unsafe_allow_html=True)
@@ -1103,12 +1103,12 @@ with top_right:
     detected_side = current.get("side")
     style = resolve_lesion_style(prediction, detected_side)
     flag_word = "Clear" if prediction == "no_tumor" else "Flagged"
-    volume_tag = f" Â· Vol {current['volume_cm3']:.1f} cmÂ³" if "volume_cm3" in current else ""
-    tumor_tag = f" Â· ~{current['tumor_diameter_mm'] / 10:.1f} cm mass" if current.get("tumor_diameter_mm") else ""
+    volume_tag = f" - Vol {current['volume_cm3'] * 1000:.0f} mm^3" if "volume_cm3" in current else ""
+    tumor_tag = f" - approx. {current['tumor_diameter_mm']:.0f} mm mass" if current.get("tumor_diameter_mm") else ""
     st.markdown('<div class="panel">', unsafe_allow_html=True)
     st.markdown(
         f"""
-        <div class="panel-head"><span><b>03</b> Â· Current 3D readout</span><span class="status-pill" style="color:{style['color']}">{flag_word}</span></div>
+        <div class="panel-head"><span><b>03</b> - Current 3D readout</span><span class="status-pill" style="color:{style['color']}">{flag_word}</span></div>
         <div class="prediction" style="--accent:{style['color']}">
             <span>{current['name']}</span>
             <strong>{LABELS.get(prediction, prediction)}</strong>
@@ -1151,9 +1151,9 @@ if st.session_state.trials:
         col = cols[index % len(cols)]
         style = resolve_lesion_style(trial["prediction"], trial.get("side"))
         if trial.get("tumor_diameter_mm"):
-            vol_line = f"~{trial['tumor_diameter_mm'] / 10:.1f} cm mass"
+            vol_line = f"approx. {trial['tumor_diameter_mm']:.0f} mm mass"
         elif "volume_cm3" in trial:
-            vol_line = f"{trial['volume_cm3']:.1f} cmÂ³ brain"
+            vol_line = f"{trial['volume_cm3'] * 1000:.0f} mm^3 brain"
         else:
             vol_line = trial["digest"]
         with col:
@@ -1177,4 +1177,5 @@ if st.session_state.trials:
             st.markdown("</div>", unsafe_allow_html=True)
 else:
     st.write("Analyzed scans will appear here, each with its own 3D readout.")
+
 
