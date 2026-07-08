@@ -142,6 +142,15 @@ def estimator_probabilities(estimator, features: np.ndarray, classes: list[str])
     return aligned if aligned.sum() > 0 else None
 
 
+def estimator_prediction_label(estimator, features: np.ndarray, classes: list[str]) -> str | None:
+    raw_prediction = estimator.predict(features)[0]
+    if isinstance(raw_prediction, (int, np.integer)) and 0 <= int(raw_prediction) < len(classes):
+        return classes[int(raw_prediction)]
+    if raw_prediction in classes:
+        return raw_prediction
+    return None
+
+
 def predict_with_confidence(uploaded_file, image_size: int = 48) -> dict:
     with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp:
         temp.write(uploaded_file.getbuffer())
@@ -153,15 +162,28 @@ def predict_with_confidence(uploaded_file, image_size: int = 48) -> dict:
     classes = list(getattr(model, "classes_", LABELS.keys()))
     predicted = model.predict(features)[0]
     probability_rows = []
+    votes = {label: 0 for label in classes}
 
     if hasattr(model, "named_estimators_"):
-        for name in ("knn_cosine", "extra_trees", "pca_hgb"):
+        for name in ("linear_svc", "knn_cosine", "extra_trees", "pca_hgb"):
             estimator = model.named_estimators_.get(name)
             if estimator is None:
                 continue
+            vote = estimator_prediction_label(estimator, features, classes)
+            if vote in votes:
+                votes[vote] += 1
             probs = estimator_probabilities(estimator, features, classes)
             if probs is not None:
                 probability_rows.append(probs)
+
+    total_votes = sum(votes.values())
+    if total_votes > 0:
+        vote_probs = {label: count / total_votes for label, count in votes.items()}
+        return {
+            "prediction": predicted,
+            "confidence": vote_probs.get(predicted, 0.0),
+            "probabilities": vote_probs,
+        }
 
     if probability_rows:
         avg_probs = np.mean(probability_rows, axis=0)
