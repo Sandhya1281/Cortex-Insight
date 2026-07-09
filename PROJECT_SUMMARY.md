@@ -1,11 +1,5 @@
 # Project Summary
 
-Finished project location:
-
-```text
-C:\Users\Sanja\Documents\Codex\2026-07-05\fin\outputs\brisc2025_project
-```
-
 ## Completed work
 
 - Extracted and validated the BRISC 2025 dataset.
@@ -33,8 +27,3 @@ C:\Users\Sanja\Documents\Codex\2026-07-05\fin\outputs\brisc2025_project
 - `reports/classification_baseline.joblib`
 - `reports/segmentation_baseline_metrics.json`
 
-## Recommended next improvement
-
-The classification ensemble now clears the requested 90% accuracy target. The
-segmentation baseline is intentionally simple and should be replaced with a U-Net,
-DeepLab, or Swin-style model for serious mask prediction.
