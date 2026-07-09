@@ -56,32 +56,6 @@ Early detection of brain tumors from MRI scans is time-critical but often bottle
 
 ---
 
-## Getting Started
-
-### Prerequisites
-- Python 3.9+
-- Grok API key
-
-### Installation
-
-```bash
-git clone https://github.com/Sandhya1281/brain-mri-scan-app.git
-cd brain-mri-scan-app
-pip install -r requirements.txt
-```
-
-### Set up environment variables
-Create a `.env` file or add to Streamlit secrets:
-```
-GROK_API_KEY=your_api_key_here
-```
-
-### Run locally
-```bash
-streamlit run app.py
-```
-
----
 
 ## Features
 
@@ -98,24 +72,3 @@ This tool is a **proof-of-concept for educational/demonstration purposes only**.
 
 ---
 
-## Future Enhancements
-
-- Train on larger, more diverse MRI datasets for better generalization.
-- Add tumor segmentation (e.g., U-Net) to highlight the tumor region visually.
-- Add Grad-CAM visual explainability to show which regions influenced the CNN's decision.
-- Ensemble models for improved accuracy.
-- User accounts with scan history tracking.
-- Offline/low-connectivity mode for clinics with limited internet access.
-- Clinical validation with radiologists.
-
----
-
-## Author
-
-Built by Sna as part of an applied ML/healthcare AI project.
-
----
-
-## License
-
-*(Add your preferred license here, e.g., MIT)*
